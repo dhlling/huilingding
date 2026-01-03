@@ -49,6 +49,8 @@ dev = [
 
 [project.scripts]
 college-planner = "src.main:app"
+test-ui = "src.test_ui.cli:main"
+test-web = "src.test_ui.web:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
