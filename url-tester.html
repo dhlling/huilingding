@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Tester</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .result-section {
+            margin-top: 20px;
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 100px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .status-valid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-invalid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .url-parts {
+            display: grid;
+            gap: 10px;
+        }
+
+        .url-part {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .url-part-label {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 120px;
+        }
+
+        .url-part-value {
+            color: #333;
+            word-break: break-all;
+        }
+
+        .encoded-result {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .sample-urls {
+            margin-top: 20px;
+        }
+
+        .sample-urls h3 {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .sample-url {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            margin: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .sample-url:hover {
+            background: #dee2e6;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>URL Tester</h1>
+
+        <div class="card">
+            <div class="input-group">
+                <label for="urlInput">Enter URL to Test</label>
+                <input type="text" id="urlInput" placeholder="https://example.com/path?query=value#hash">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="validateBtn">Validate URL</button>
+                <button class="btn-success" id="parseBtn">Parse URL</button>
+                <button class="btn-secondary" id="encodeBtn">Encode URL</button>
+                <button class="btn-secondary" id="decodeBtn">Decode URL</button>
+                <button class="btn-warning" id="clearBtn">Clear</button>
+            </div>
+
+            <div class="sample-urls">
+                <h3>Try these sample URLs:</h3>
+                <span class="sample-url" data-url="https://www.example.com/path/to/page?name=John&age=30#section1">Full URL with params</span>
+                <span class="sample-url" data-url="https://api.github.com/users/octocat">API endpoint</span>
+                <span class="sample-url" data-url="ftp://files.example.com:21/downloads/file.zip">FTP URL</span>
+                <span class="sample-url" data-url="mailto:test@example.com">Email URL</span>
+                <span class="sample-url" data-url="not a valid url">Invalid URL</span>
+            </div>
+        </div>
+
+        <div class="card result-section" id="resultSection" style="display: none;">
+            <div class="result-title">Results</div>
+            <div class="result-box" id="resultBox"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const urlInput = document.getElementById('urlInput');
+        const resultSection = document.getElementById('resultSection');
+        const resultBox = document.getElementById('resultBox');
+
+        // Store current result for copy functionality
+        let currentEncodedResult = '';
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showResult(content) {
+            resultSection.style.display = 'block';
+            resultBox.innerHTML = content;
+        }
+
+        function validateURL() {
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showResult('<p class="error-message">Please enter a URL to validate.</p>');
+                return;
+            }
+
+            try {
+                const urlObj = new URL(url);
+                showResult(
+                    '<span class="status status-valid">✓ Valid URL</span>' +
+                    '<div class="url-parts">' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Protocol:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.protocol) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Host:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.host) + '</span>' +
+                        '</div>' +
+                    '</div>'
+                );
+            } catch (e) {
+                showResult(
+                    '<span class="status status-invalid">✗ Invalid URL</span>' +
+                    '<p style="margin-top: 10px; color: #666;">The URL format is not valid. Make sure it includes a protocol (e.g., https://)</p>'
+                );
+            }
+        }
+
+        function parseURL() {
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showResult('<p class="error-message">Please enter a URL to parse.</p>');
+                return;
+            }
+
+            try {
+                const urlObj = new URL(url);
+                const params = new URLSearchParams(urlObj.search);
+                let paramsHtml = '';
+
+                if (params.toString()) {
+                    paramsHtml = '<div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 6px;">';
+                    paramsHtml += '<strong>Query Parameters:</strong><br>';
+                    for (const [key, value] of params) {
+                        paramsHtml += '<code>' + escapeHtml(key) + '</code> = <code>' + escapeHtml(value) + '</code><br>';
+                    }
+                    paramsHtml += '</div>';
+                }
+
+                showResult(
+                    '<span class="status status-valid">✓ URL Parsed Successfully</span>' +
+                    '<div class="url-parts">' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Protocol:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.protocol) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Username:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.username || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Password:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.password || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Hostname:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.hostname) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Port:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.port || '(default)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Pathname:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.pathname) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Search:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.search || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Hash:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.hash || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Origin:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.origin) + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    paramsHtml
+                );
+            } catch (e) {
+                showResult(
+                    '<span class="status status-invalid">✗ Cannot Parse URL</span>' +
+                    '<p style="margin-top: 10px; color: #666;">Error: ' + escapeHtml(e.message) + '</p>'
+                );
+            }
+        }
+
+        function encodeURL() {
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showResult('<p class="error-message">Please enter a URL to encode.</p>');
+                return;
+            }
+
+            const encoded = encodeURIComponent(url);
+            currentEncodedResult = encoded;
+
+            showResult(
+                '<span class="status status-valid">✓ URL Encoded</span>' +
+                '<div style="margin-top: 15px;">' +
+                    '<strong>Original:</strong>' +
+                    '<div class="encoded-result" style="margin: 10px 0;">' + escapeHtml(url) + '</div>' +
+                    '<strong>Encoded:</strong>' +
+                    '<div class="encoded-result" style="margin: 10px 0;" id="encodedOutput">' + escapeHtml(encoded) + '</div>' +
+                    '<button class="btn-secondary copy-btn" id="copyEncodedBtn">Copy Encoded URL</button>' +
+                '</div>'
+            );
+
+            // Add click handler for copy button
+            document.getElementById('copyEncodedBtn').addEventListener('click', function() {
+                copyToClipboard(currentEncodedResult);
+            });
+        }
+
+        function decodeURL() {
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showResult('<p class="error-message">Please enter an encoded URL to decode.</p>');
+                return;
+            }
+
+            try {
+                const decoded = decodeURIComponent(url);
+                currentEncodedResult = decoded;
+
+                showResult(
+                    '<span class="status status-valid">✓ URL Decoded</span>' +
+                    '<div style="margin-top: 15px;">' +
+                        '<strong>Encoded:</strong>' +
+                        '<div class="encoded-result" style="margin: 10px 0;">' + escapeHtml(url) + '</div>' +
+                        '<strong>Decoded:</strong>' +
+                        '<div class="encoded-result" style="margin: 10px 0;" id="decodedOutput">' + escapeHtml(decoded) + '</div>' +
+                        '<button class="btn-secondary copy-btn" id="copyDecodedBtn">Copy Decoded URL</button>' +
+                    '</div>'
+                );
+
+                // Add click handler for copy button
+                document.getElementById('copyDecodedBtn').addEventListener('click', function() {
+                    copyToClipboard(currentEncodedResult);
+                });
+            } catch (e) {
+                showResult(
+                    '<span class="status status-invalid">✗ Cannot Decode URL</span>' +
+                    '<p style="margin-top: 10px; color: #666;">Error: ' + escapeHtml(e.message) + '</p>'
+                );
+            }
+        }
+
+        function clearAll() {
+            urlInput.value = '';
+            resultSection.style.display = 'none';
+            resultBox.innerHTML = '';
+            currentEncodedResult = '';
+        }
+
+        function useSample(url) {
+            urlInput.value = url;
+            validateURL();
+        }
+
+        function copyToClipboard(text) {
+            // Try using the Clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    alert('Copied to clipboard!');
+                }).catch(function(err) {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            // Fallback for browsers that don't support Clipboard API
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('Copied to clipboard!');
+            } catch (err) {
+                alert('Failed to copy. Please copy manually.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Event Listeners
+        document.getElementById('validateBtn').addEventListener('click', validateURL);
+        document.getElementById('parseBtn').addEventListener('click', parseURL);
+        document.getElementById('encodeBtn').addEventListener('click', encodeURL);
+        document.getElementById('decodeBtn').addEventListener('click', decodeURL);
+        document.getElementById('clearBtn').addEventListener('click', clearAll);
+
+        // Sample URL click handlers
+        document.querySelectorAll('.sample-url').forEach(function(el) {
+            el.addEventListener('click', function() {
+                useSample(this.getAttribute('data-url'));
+            });
+        });
+
+        // Allow Enter key to trigger validation
+        urlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateURL();
+            }
+        });
+    </script>
+</body>
+</html>
