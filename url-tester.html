@@ -213,6 +213,10 @@
             margin-top: 10px;
         }
 
+        .copy-btn {
+            margin-top: 10px;
+        }
+
         @media (max-width: 600px) {
             h1 {
                 font-size: 1.8rem;
@@ -239,20 +243,20 @@
             </div>
 
             <div class="button-group">
-                <button class="btn-primary" onclick="validateURL()">Validate URL</button>
-                <button class="btn-success" onclick="parseURL()">Parse URL</button>
-                <button class="btn-secondary" onclick="encodeURL()">Encode URL</button>
-                <button class="btn-secondary" onclick="decodeURL()">Decode URL</button>
-                <button class="btn-warning" onclick="clearAll()">Clear</button>
+                <button class="btn-primary" id="validateBtn">Validate URL</button>
+                <button class="btn-success" id="parseBtn">Parse URL</button>
+                <button class="btn-secondary" id="encodeBtn">Encode URL</button>
+                <button class="btn-secondary" id="decodeBtn">Decode URL</button>
+                <button class="btn-warning" id="clearBtn">Clear</button>
             </div>
 
             <div class="sample-urls">
                 <h3>Try these sample URLs:</h3>
-                <span class="sample-url" onclick="useSample('https://www.example.com/path/to/page?name=John&age=30#section1')">Full URL with params</span>
-                <span class="sample-url" onclick="useSample('https://api.github.com/users/octocat')">API endpoint</span>
-                <span class="sample-url" onclick="useSample('ftp://files.example.com:21/downloads/file.zip')">FTP URL</span>
-                <span class="sample-url" onclick="useSample('mailto:test@example.com')">Email URL</span>
-                <span class="sample-url" onclick="useSample('not a valid url')">Invalid URL</span>
+                <span class="sample-url" data-url="https://www.example.com/path/to/page?name=John&age=30#section1">Full URL with params</span>
+                <span class="sample-url" data-url="https://api.github.com/users/octocat">API endpoint</span>
+                <span class="sample-url" data-url="ftp://files.example.com:21/downloads/file.zip">FTP URL</span>
+                <span class="sample-url" data-url="mailto:test@example.com">Email URL</span>
+                <span class="sample-url" data-url="not a valid url">Invalid URL</span>
             </div>
         </div>
 
@@ -263,9 +267,19 @@
     </div>
 
     <script>
+        // DOM elements
         const urlInput = document.getElementById('urlInput');
         const resultSection = document.getElementById('resultSection');
         const resultBox = document.getElementById('resultBox');
+
+        // Store current result for copy functionality
+        let currentEncodedResult = '';
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         function showResult(content) {
             resultSection.style.display = 'block';
@@ -282,24 +296,24 @@
 
             try {
                 const urlObj = new URL(url);
-                showResult(`
-                    <span class="status status-valid">✓ Valid URL</span>
-                    <div class="url-parts">
-                        <div class="url-part">
-                            <span class="url-part-label">Protocol:</span>
-                            <span class="url-part-value">${urlObj.protocol}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Host:</span>
-                            <span class="url-part-value">${urlObj.host}</span>
-                        </div>
-                    </div>
-                `);
+                showResult(
+                    '<span class="status status-valid">✓ Valid URL</span>' +
+                    '<div class="url-parts">' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Protocol:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.protocol) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Host:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.host) + '</span>' +
+                        '</div>' +
+                    '</div>'
+                );
             } catch (e) {
-                showResult(`
-                    <span class="status status-invalid">✗ Invalid URL</span>
-                    <p style="margin-top: 10px; color: #666;">The URL format is not valid. Make sure it includes a protocol (e.g., https://)</p>
-                `);
+                showResult(
+                    '<span class="status status-invalid">✗ Invalid URL</span>' +
+                    '<p style="margin-top: 10px; color: #666;">The URL format is not valid. Make sure it includes a protocol (e.g., https://)</p>'
+                );
             }
         }
 
@@ -320,58 +334,58 @@
                     paramsHtml = '<div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 6px;">';
                     paramsHtml += '<strong>Query Parameters:</strong><br>';
                     for (const [key, value] of params) {
-                        paramsHtml += `<code>${key}</code> = <code>${value}</code><br>`;
+                        paramsHtml += '<code>' + escapeHtml(key) + '</code> = <code>' + escapeHtml(value) + '</code><br>';
                     }
                     paramsHtml += '</div>';
                 }
 
-                showResult(`
-                    <span class="status status-valid">✓ URL Parsed Successfully</span>
-                    <div class="url-parts">
-                        <div class="url-part">
-                            <span class="url-part-label">Protocol:</span>
-                            <span class="url-part-value">${urlObj.protocol}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Username:</span>
-                            <span class="url-part-value">${urlObj.username || '(none)'}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Password:</span>
-                            <span class="url-part-value">${urlObj.password || '(none)'}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Hostname:</span>
-                            <span class="url-part-value">${urlObj.hostname}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Port:</span>
-                            <span class="url-part-value">${urlObj.port || '(default)'}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Pathname:</span>
-                            <span class="url-part-value">${urlObj.pathname}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Search:</span>
-                            <span class="url-part-value">${urlObj.search || '(none)'}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Hash:</span>
-                            <span class="url-part-value">${urlObj.hash || '(none)'}</span>
-                        </div>
-                        <div class="url-part">
-                            <span class="url-part-label">Origin:</span>
-                            <span class="url-part-value">${urlObj.origin}</span>
-                        </div>
-                    </div>
-                    ${paramsHtml}
-                `);
+                showResult(
+                    '<span class="status status-valid">✓ URL Parsed Successfully</span>' +
+                    '<div class="url-parts">' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Protocol:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.protocol) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Username:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.username || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Password:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.password || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Hostname:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.hostname) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Port:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.port || '(default)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Pathname:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.pathname) + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Search:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.search || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Hash:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.hash || '(none)') + '</span>' +
+                        '</div>' +
+                        '<div class="url-part">' +
+                            '<span class="url-part-label">Origin:</span>' +
+                            '<span class="url-part-value">' + escapeHtml(urlObj.origin) + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    paramsHtml
+                );
             } catch (e) {
-                showResult(`
-                    <span class="status status-invalid">✗ Cannot Parse URL</span>
-                    <p style="margin-top: 10px; color: #666;">Error: ${e.message}</p>
-                `);
+                showResult(
+                    '<span class="status status-invalid">✗ Cannot Parse URL</span>' +
+                    '<p style="margin-top: 10px; color: #666;">Error: ' + escapeHtml(e.message) + '</p>'
+                );
             }
         }
 
@@ -384,16 +398,23 @@
             }
 
             const encoded = encodeURIComponent(url);
-            showResult(`
-                <span class="status status-valid">✓ URL Encoded</span>
-                <div style="margin-top: 15px;">
-                    <strong>Original:</strong>
-                    <div class="encoded-result" style="margin: 10px 0;">${url}</div>
-                    <strong>Encoded:</strong>
-                    <div class="encoded-result" style="margin: 10px 0;">${encoded}</div>
-                    <button class="btn-secondary" onclick="copyToClipboard('${encoded}')" style="margin-top: 10px;">Copy Encoded URL</button>
-                </div>
-            `);
+            currentEncodedResult = encoded;
+
+            showResult(
+                '<span class="status status-valid">✓ URL Encoded</span>' +
+                '<div style="margin-top: 15px;">' +
+                    '<strong>Original:</strong>' +
+                    '<div class="encoded-result" style="margin: 10px 0;">' + escapeHtml(url) + '</div>' +
+                    '<strong>Encoded:</strong>' +
+                    '<div class="encoded-result" style="margin: 10px 0;" id="encodedOutput">' + escapeHtml(encoded) + '</div>' +
+                    '<button class="btn-secondary copy-btn" id="copyEncodedBtn">Copy Encoded URL</button>' +
+                '</div>'
+            );
+
+            // Add click handler for copy button
+            document.getElementById('copyEncodedBtn').addEventListener('click', function() {
+                copyToClipboard(currentEncodedResult);
+            });
         }
 
         function decodeURL() {
@@ -406,21 +427,28 @@
 
             try {
                 const decoded = decodeURIComponent(url);
-                showResult(`
-                    <span class="status status-valid">✓ URL Decoded</span>
-                    <div style="margin-top: 15px;">
-                        <strong>Encoded:</strong>
-                        <div class="encoded-result" style="margin: 10px 0;">${url}</div>
-                        <strong>Decoded:</strong>
-                        <div class="encoded-result" style="margin: 10px 0;">${decoded}</div>
-                        <button class="btn-secondary" onclick="copyToClipboard('${decoded.replace(/'/g, "\\'")}')" style="margin-top: 10px;">Copy Decoded URL</button>
-                    </div>
-                `);
+                currentEncodedResult = decoded;
+
+                showResult(
+                    '<span class="status status-valid">✓ URL Decoded</span>' +
+                    '<div style="margin-top: 15px;">' +
+                        '<strong>Encoded:</strong>' +
+                        '<div class="encoded-result" style="margin: 10px 0;">' + escapeHtml(url) + '</div>' +
+                        '<strong>Decoded:</strong>' +
+                        '<div class="encoded-result" style="margin: 10px 0;" id="decodedOutput">' + escapeHtml(decoded) + '</div>' +
+                        '<button class="btn-secondary copy-btn" id="copyDecodedBtn">Copy Decoded URL</button>' +
+                    '</div>'
+                );
+
+                // Add click handler for copy button
+                document.getElementById('copyDecodedBtn').addEventListener('click', function() {
+                    copyToClipboard(currentEncodedResult);
+                });
             } catch (e) {
-                showResult(`
-                    <span class="status status-invalid">✗ Cannot Decode URL</span>
-                    <p style="margin-top: 10px; color: #666;">Error: ${e.message}</p>
-                `);
+                showResult(
+                    '<span class="status status-invalid">✗ Cannot Decode URL</span>' +
+                    '<p style="margin-top: 10px; color: #666;">Error: ' + escapeHtml(e.message) + '</p>'
+                );
             }
         }
 
@@ -428,6 +456,7 @@
             urlInput.value = '';
             resultSection.style.display = 'none';
             resultBox.innerHTML = '';
+            currentEncodedResult = '';
         }
 
         function useSample(url) {
@@ -436,12 +465,48 @@
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Copied to clipboard!');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-            });
+            // Try using the Clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    alert('Copied to clipboard!');
+                }).catch(function(err) {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
         }
+
+        function fallbackCopy(text) {
+            // Fallback for browsers that don't support Clipboard API
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('Copied to clipboard!');
+            } catch (err) {
+                alert('Failed to copy. Please copy manually.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Event Listeners
+        document.getElementById('validateBtn').addEventListener('click', validateURL);
+        document.getElementById('parseBtn').addEventListener('click', parseURL);
+        document.getElementById('encodeBtn').addEventListener('click', encodeURL);
+        document.getElementById('decodeBtn').addEventListener('click', decodeURL);
+        document.getElementById('clearBtn').addEventListener('click', clearAll);
+
+        // Sample URL click handlers
+        document.querySelectorAll('.sample-url').forEach(function(el) {
+            el.addEventListener('click', function() {
+                useSample(this.getAttribute('data-url'));
+            });
+        });
 
         // Allow Enter key to trigger validation
         urlInput.addEventListener('keypress', function(e) {
